@@ -1,7 +1,7 @@
 name: sliver_tabbar_with_mixed_list
-description: "A new Flutter package project."
+description: "A Flutter package that provides a sliver widget with a customizable tab bar and a mixed list of items."
 version: 0.0.1
-homepage:
+homepage: https://github.com/Bomsamdi/sliver_tabbar_with_mixed_list
 
 environment:
   sdk: '>=3.3.2 <4.0.0'

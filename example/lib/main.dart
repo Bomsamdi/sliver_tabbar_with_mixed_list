@@ -31,10 +31,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<Section> sections = [];
+  List<HeaderItem> sections = [];
   double listHeaderHeight = 80;
+  double listHeaderSmallHeight = 40;
   double listSubheaderHeight = 50;
   double listItemHeight = 100;
+  double variantListItemHeight = 120;
   @override
   void initState() {
     super.initState();
@@ -51,21 +53,27 @@ class _MyHomePageState extends State<MyHomePage> {
       2,
       (index) => Child(itemHeight: listItemHeight),
     );
+
+    List<ChildItem> variantChildrean = List.generate(
+      4,
+      (index) => VariantChild(itemHeight: variantListItemHeight),
+    );
     for (int i = 0; i < 11; i++) {
       double offsetToAdd = 0;
-      Header header = Header(
-        key: ValueKey(i),
-        name: 'Header item $i',
-        offsetStart: offsetStart,
-        childrenCount: children.length,
-        itemHeight: listHeaderHeight,
-        childrenHeight: listItemHeight,
-        childrean: children,
-        subSections: List.generate(
-          3,
-          (index) {
-            var subSubSection = Section(
-              header: SubHeader(
+      Header header;
+      if (i < 10) {
+        header = Header(
+          key: ValueKey(i),
+          name: 'Header item $i',
+          offsetStart: offsetStart,
+          childrenCount: children.length,
+          itemHeight: listHeaderHeight,
+          childrenHeight: listItemHeight,
+          childrean: children,
+          subSections: List.generate(
+            3,
+            (index) {
+              var subSubSection = SubHeader(
                 key: ValueKey(index),
                 name: 'SubSubheader item $index',
                 offsetStart: offsetStart,
@@ -73,14 +81,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 itemHeight: listSubheaderHeight,
                 childrenHeight: listItemHeight,
                 childrean: subSubChildren,
-              ),
-              children: subSubChildren,
-            );
-            offsetToAdd += subSubSection.header.itemHeight +
-                (subSubSection.header.childrenHeight *
-                    subSubSection.header.childrenCount);
-            var section = Section(
-              header: SubHeader(
+              );
+              offsetToAdd += subSubSection.itemHeight +
+                  (subSubSection.childrenHeight * subSubSection.childrenCount);
+              var section = SubHeader(
                 key: ValueKey(index),
                 name: 'Subheader item $index',
                 offsetStart: offsetStart,
@@ -88,28 +92,67 @@ class _MyHomePageState extends State<MyHomePage> {
                 itemHeight: listSubheaderHeight,
                 childrenHeight: listItemHeight,
                 subSections: [subSubSection],
-              ),
-              children: subChildren,
-            );
+                childrean: subChildren,
+              );
 
-            offsetToAdd +=
-                listSubheaderHeight + (listItemHeight * subChildren.length);
+              offsetToAdd +=
+                  listSubheaderHeight + (listItemHeight * subChildren.length);
 
-            return section;
-          },
-        ),
-      );
+              return section;
+            },
+          ),
+        );
+      } else {
+        header = Header(
+          key: ValueKey(i),
+          name: 'Header V item $i',
+          offsetStart: offsetStart,
+          childrenCount: children.length,
+          itemHeight: listHeaderSmallHeight,
+          childrenHeight: variantListItemHeight,
+          childrean: variantChildrean,
+          subSections: List.generate(
+            3,
+            (index) {
+              var subSubSection = SubHeader(
+                key: ValueKey(index),
+                name: 'SubSubheader V item $index',
+                offsetStart: offsetStart,
+                childrenCount: subSubChildren.length,
+                itemHeight: listSubheaderHeight,
+                childrenHeight: variantListItemHeight,
+                childrean: variantChildrean,
+              );
+              offsetToAdd += subSubSection.itemHeight +
+                  (subSubSection.childrenHeight * subSubSection.childrenCount);
+              var section = SubHeader(
+                key: ValueKey(index),
+                name: 'Subheader  V item $index',
+                offsetStart: offsetStart,
+                childrenCount: subChildren.length,
+                itemHeight: listSubheaderHeight,
+                childrenHeight: variantListItemHeight,
+                subSections: [subSubSection],
+                childrean: variantChildrean,
+              );
+
+              offsetToAdd += listSubheaderHeight +
+                  (variantListItemHeight * subChildren.length);
+
+              return section;
+            },
+          ),
+        );
+      }
       offsetStart += offsetToAdd;
       offsetToAdd = 0;
 
       offsetStart +=
           header.itemHeight + (header.childrenHeight * header.childrenCount);
       header = Header.clone(header, offsetStart);
-      sections.add(Section(
-        header: header,
-        children: children,
-      ));
+      sections.add(header);
     }
+    sections.last = Header.clone((sections.last as Header), double.infinity);
   }
 
   Widget buildHeader(BuildContext context, HeaderItem item) {
@@ -150,6 +193,28 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  Widget buildVariantChild(
+      BuildContext context, covariant VariantChildItem item) {
+    return Container(
+      color: Colors.purple.shade400,
+      child: const Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Variant Child item',
+              style: TextStyle(fontSize: 16),
+            ),
+            Text(
+              'Variant Child Description',
+              style: TextStyle(fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   double itemExtentBuilder(
       ListItem item, int index, SliverLayoutDimensions dimensions) {
     return item.itemHeight;
@@ -183,6 +248,7 @@ class _MyHomePageState extends State<MyHomePage> {
               headerBuilder: buildHeader,
               subHeaderBuilder: buildSubHeader,
               childBuilder: buildChild,
+              variantChildBuilder: buildVariantChild,
               itemExtentBuilder: itemExtentBuilder,
             )
           ],
@@ -246,4 +312,8 @@ class SubHeader extends SubheaderItem {
 
 class Child extends ChildItem {
   Child({required super.itemHeight});
+}
+
+class VariantChild extends VariantChildItem {
+  VariantChild({required super.itemHeight});
 }

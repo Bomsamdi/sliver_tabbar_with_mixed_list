@@ -12,6 +12,8 @@ typedef HeaderBuilder = Widget Function(BuildContext context, HeaderItem item);
 typedef SubHeaderBuilder = Widget Function(
     BuildContext context, SubheaderItem item);
 typedef ChildBuilder = Widget Function(BuildContext context, ChildItem item);
+typedef VariantChildBuilder = Widget Function(
+    BuildContext context, VariantChildItem item);
 typedef ExtendedItemExtentBuilder = double Function(
     ListItem item, int index, SliverLayoutDimensions dimensions);
 
@@ -27,6 +29,7 @@ class SliverTabBarWithMixedList extends StatefulWidget {
     required this.childBuilder,
     required this.itemExtentBuilder,
     required this.sections,
+    this.variantChildBuilder,
     this.scrollAnimated = true,
     this.headerBuilder,
     this.subHeaderBuilder,
@@ -62,7 +65,7 @@ class SliverTabBarWithMixedList extends StatefulWidget {
   final Curve listScrollCurveAnimation;
 
   /// The list of sections to display.
-  final List<Section> sections;
+  final List<HeaderItem> sections;
 
   /// The controller to use for the scroll view.
   final ScrollController controller;
@@ -77,6 +80,8 @@ class SliverTabBarWithMixedList extends StatefulWidget {
 
   /// The builder to use for the child items.
   final ChildBuilder childBuilder;
+
+  final VariantChildBuilder? variantChildBuilder;
 
   /// The start offset of the list. It is needed when
   ///
@@ -115,7 +120,7 @@ class _SliverTabBarWithMixedListState extends State<SliverTabBarWithMixedList>
   /// The list of items to display.
   final List<ListItem> _items = [];
 
-  List<Section> _sections = [];
+  List<HeaderItem> _sections = [];
 
   /// The list of tab items to display.
   late List<TabItem> _tabItems;
@@ -142,27 +147,24 @@ class _SliverTabBarWithMixedListState extends State<SliverTabBarWithMixedList>
     _listItemHeight = widget.listItemHeight;
     _sections = widget.sections;
     _tabController = TabController(length: _sections.length, vsync: this);
-    for (Section section in _sections) {
-      _items.addAll(section.header.iterateSections((section) {
-        return [section];
-      }));
-    }
+    _items.addAll(flattenList(_sections));
 
     _tabItems = [];
     int count = 0;
     for (var i = 0; i < _sections.length; i++) {
       _tabItems.add(TabItem(
         key: ValueKey(count),
-        headerItem: _sections[i].header,
+        headerItem: _sections[i],
         text: 'Tab ${_tabItems.length} $count',
       ));
       if (_tabItems[i].headerItem.subSections != null) {
         for (var j = 0; j < _tabItems[i].headerItem.subSections!.length; j++) {
-          count +=
-              _tabItems[i].headerItem.subSections![j].header.childrenCount + 1;
+          count += _tabItems[i].headerItem.subSections![j].childrenCount + 1;
         }
       }
-      count += _sections[i].children.length + 1;
+      if (_sections[i].childrean != null) {
+        count += _sections[i].childrean!.length + 1;
+      }
     }
     _indexOfLastHeaderItem =
         _items.lastIndexWhere((element) => element is HeaderItem);
@@ -180,17 +182,7 @@ class _SliverTabBarWithMixedListState extends State<SliverTabBarWithMixedList>
           }
         }
 
-        // HeaderItem item =
-        //     _items.whereType<HeaderItem>().toList().firstWhere((element) {
-        //   final HeaderItem headerItem = element;
-        //   return widget.controller.offset >=
-        //           headerItem.offsetStart + widget.startOffset &&
-        //       widget.controller.offset <
-        //           headerItem.offsetEnd + widget.startOffset;
-        // }, orElse: () => _items.first as HeaderItem);
-        HeaderItem item =
-            // items.whereType<HeaderItem>().toList()
-            items.firstWhere((element) {
+        HeaderItem item = items.firstWhere((element) {
           final HeaderItem headerItem = element;
           return widget.controller.offset >=
                   headerItem.offsetStart + widget.startOffset &&
@@ -209,6 +201,28 @@ class _SliverTabBarWithMixedListState extends State<SliverTabBarWithMixedList>
         }
       }
     });
+  }
+
+  List<ListItem> flattenList(List<HeaderItem> list) {
+    List<ListItem> result = [];
+    void flatten(HeaderItem header) {
+      if (header.childrean != null) {
+        result.add(header);
+        for (var element in header.childrean!) {
+          result.add(element);
+        }
+      }
+      if (header.subSections != null) {
+        for (var element in header.subSections!) {
+          flatten(element);
+        }
+      }
+    }
+
+    for (var element in list) {
+      flatten(element);
+    }
+    return result;
   }
 
   @override
@@ -257,12 +271,7 @@ class _SliverTabBarWithMixedListState extends State<SliverTabBarWithMixedList>
   void _onTapTabBarItem(int value) {
     scrollAnimationEnabled = false;
     TabItem tabItem = _tabItems[value];
-    // double sum = 0;
-    // if(tabItem.headerItem.subSections != null){
-    //   for (var i = 0; i < tabItem.headerItem.subSections!.length; i++) {
-    //     sum += tabItem.headerItem.subSections![i].header.itemHeight;
-    //   }
-    // }
+
     widget.scrollAnimated
         ? widget.controller
             .animateTo(
@@ -308,7 +317,9 @@ class _SliverTabBarWithMixedListState extends State<SliverTabBarWithMixedList>
         },
         itemBuilder: (context, index) {
           var item = _items[index];
-          if (item is ChildItem) {
+          if (item is VariantChildItem && widget.variantChildBuilder != null) {
+            return widget.variantChildBuilder!(context, item);
+          } else if (item is ChildItem) {
             return widget.childBuilder(context, item);
           } else if (item is SubheaderItem && widget.subHeaderBuilder != null) {
             return widget.subHeaderBuilder!(context, item);
@@ -336,7 +347,7 @@ abstract class HeaderItem extends ListItem {
     this.childrean,
     this.subSections,
   }) : offsetEnd = offsetStart + (childrenHeight * childrenCount) + itemHeight;
-  final List<Section>? subSections;
+  final List<SubheaderItem>? subSections;
   final double offsetStart;
   final double offsetEnd;
   final double childrenHeight;
@@ -361,9 +372,11 @@ abstract class HeaderItem extends ListItem {
     result.addAll(childrean ?? []);
     subSections?.forEach((subsection) {
       result.addAll(
-        subsection.header.iterateSections(action),
+        subsection.iterateSections(action),
       );
-      result.addAll(subsection.children);
+      if (subsection.childrean != null) {
+        result.addAll(subsection.childrean!);
+      }
     });
     return result;
   }
@@ -388,9 +401,11 @@ abstract class SubheaderItem extends HeaderItem {
     result.addAll(childrean ?? []);
     subSections?.forEach((subsection) {
       result.addAll(
-        subsection.header.iterateSections(action),
+        subsection.iterateSections(action),
       );
-      result.addAll(subsection.children);
+      if (subsection.childrean != null) {
+        result.addAll(subsection.childrean!);
+      }
     });
     return result;
   }
@@ -398,6 +413,13 @@ abstract class SubheaderItem extends HeaderItem {
 
 abstract class ChildItem extends ListItem {
   const ChildItem({
+    super.key,
+    required super.itemHeight,
+  });
+}
+
+abstract class VariantChildItem extends ChildItem {
+  const VariantChildItem({
     super.key,
     required super.itemHeight,
   });
