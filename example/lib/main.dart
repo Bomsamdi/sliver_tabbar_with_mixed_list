@@ -220,6 +220,28 @@ class _MyHomePageState extends State<MyHomePage> {
     return item.itemHeight;
   }
 
+  List<TabItem> generateTabs(List<HeaderItem> sections) {
+    List<TabItem> tabItems = [];
+    int count = 0;
+    for (var i = 0; i < sections.length; i++) {
+      Header item = sections[i] as Header;
+      tabItems.add(TabItem(
+        key: ValueKey(count),
+        headerItem: sections[i],
+        text: item.name,
+      ));
+      if (tabItems[i].headerItem.subSections != null) {
+        for (var j = 0; j < tabItems[i].headerItem.subSections!.length; j++) {
+          count += tabItems[i].headerItem.subSections![j].childrenCount + 1;
+        }
+      }
+      if (sections[i].childrean != null) {
+        count += sections[i].childrean!.length + 1;
+      }
+    }
+    return tabItems;
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -231,6 +253,7 @@ class _MyHomePageState extends State<MyHomePage> {
               title: Text(widget.title),
             ),
             SliverTabBarWithMixedList(
+              generateTabs: generateTabs,
               controller: PrimaryScrollController.of(context),
               indicatorPadding: const EdgeInsets.symmetric(
                 horizontal: 8.0,

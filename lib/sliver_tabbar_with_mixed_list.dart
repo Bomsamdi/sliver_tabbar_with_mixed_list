@@ -17,6 +17,8 @@ typedef VariantChildBuilder = Widget Function(
 typedef ExtendedItemExtentBuilder = double Function(
     ListItem item, int index, SliverLayoutDimensions dimensions);
 
+typedef TabsBuilder = List<TabItem> Function(List<HeaderItem> sections);
+
 const double _kTabHeight = 46.0;
 
 /// A sliver list with a fixed extent and tabs.
@@ -29,6 +31,7 @@ class SliverTabBarWithMixedList extends StatefulWidget {
     required this.childBuilder,
     required this.itemExtentBuilder,
     required this.sections,
+    required this.generateTabs,
     this.variantChildBuilder,
     this.scrollAnimated = true,
     this.headerBuilder,
@@ -43,6 +46,9 @@ class SliverTabBarWithMixedList extends StatefulWidget {
     this.listScrollCurveAnimation = Curves.easeInOut,
     this.customFooterWidget,
   });
+
+  /// Function to generate the tabs.
+  final TabsBuilder generateTabs;
 
   final double? listHeaderHeight;
 
@@ -150,22 +156,7 @@ class _SliverTabBarWithMixedListState extends State<SliverTabBarWithMixedList>
     _items.addAll(flattenList(_sections));
 
     _tabItems = [];
-    int count = 0;
-    for (var i = 0; i < _sections.length; i++) {
-      _tabItems.add(TabItem(
-        key: ValueKey(count),
-        headerItem: _sections[i],
-        text: 'Tab ${_tabItems.length} $count',
-      ));
-      if (_tabItems[i].headerItem.subSections != null) {
-        for (var j = 0; j < _tabItems[i].headerItem.subSections!.length; j++) {
-          count += _tabItems[i].headerItem.subSections![j].childrenCount + 1;
-        }
-      }
-      if (_sections[i].childrean != null) {
-        count += _sections[i].childrean!.length + 1;
-      }
-    }
+    _tabItems.addAll(widget.generateTabs(_sections));
     _indexOfLastHeaderItem =
         _items.lastIndexWhere((element) => element is HeaderItem);
     if (_indexOfLastHeaderItem == -1) {
