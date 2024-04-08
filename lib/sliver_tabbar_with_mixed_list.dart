@@ -32,6 +32,9 @@ class SliverTabBarWithMixedList extends StatefulWidget {
     required this.itemExtentBuilder,
     required this.sections,
     required this.generateTabs,
+    this.prefixWidget,
+    this.sufixWidget,
+    this.tabBarScrollPhysics,
     this.variantChildBuilder,
     this.scrollAnimated = true,
     this.headerBuilder,
@@ -46,6 +49,14 @@ class SliverTabBarWithMixedList extends StatefulWidget {
     this.listScrollCurveAnimation = Curves.easeInOut,
     this.customFooterWidget,
   });
+
+  /// The widget to use as a prefix before tabs.
+  final Widget? prefixWidget;
+
+  /// The widget to use as a sufix after tabs.
+  final Widget? sufixWidget;
+
+  final ScrollPhysics? tabBarScrollPhysics;
 
   /// Function to generate the tabs.
   final TabsBuilder generateTabs;
@@ -287,15 +298,24 @@ class _SliverTabBarWithMixedListState extends State<SliverTabBarWithMixedList>
       header: SliverPinnedHeader(
         child: Container(
           color: widget.tabBarBackgroundColor ?? theme.scaffoldBackgroundColor,
-          child: TabBar(
-            isScrollable: true,
-            indicator: widget.tabBarIndicator,
-            indicatorPadding: widget.indicatorPadding,
-            indicatorSize: widget.tabBarIndicatorSize,
-            tabAlignment: widget.tabAlignment,
-            controller: _tabController,
-            onTap: _onTapTabBarItem,
-            tabs: _tabItems,
+          child: Row(
+            children: [
+              if (widget.prefixWidget != null) widget.prefixWidget!,
+              Expanded(
+                child: TabBar(
+                  isScrollable: true,
+                  indicator: widget.tabBarIndicator,
+                  indicatorPadding: widget.indicatorPadding,
+                  indicatorSize: widget.tabBarIndicatorSize,
+                  tabAlignment: widget.tabAlignment,
+                  controller: _tabController,
+                  onTap: _onTapTabBarItem,
+                  physics: widget.tabBarScrollPhysics,
+                  tabs: _tabItems,
+                ),
+              ),
+              if (widget.sufixWidget != null) widget.sufixWidget!,
+            ],
           ),
         ),
       ),
