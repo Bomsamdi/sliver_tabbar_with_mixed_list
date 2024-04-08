@@ -56,6 +56,7 @@ class SliverTabBarWithMixedList extends StatefulWidget {
     this.customFooterWidget,
     this.contentPadding = EdgeInsets.zero,
     this.buttonMargin = const EdgeInsets.all(4.0),
+    this.tabBarPadding = EdgeInsets.zero,
   });
 
   /// The widget to use as a prefix before tabs.
@@ -149,6 +150,9 @@ class SliverTabBarWithMixedList extends StatefulWidget {
 
   /// The margin for each button in the tabbar
   final EdgeInsets buttonMargin;
+
+  /// Padding for the tabbar of [SliverTabBarWithMixedList].
+  final EdgeInsets tabBarPadding;
 
   @override
   State<SliverTabBarWithMixedList> createState() =>
@@ -326,6 +330,7 @@ class _SliverTabBarWithMixedListState extends State<SliverTabBarWithMixedList>
       pushPinnedChildren: true,
       header: SliverPinnedHeader(
         child: Container(
+          padding: widget.tabBarPadding,
           color: widget.tabBarBackgroundColor ?? theme.scaffoldBackgroundColor,
           child: Row(
             children: [

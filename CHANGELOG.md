@@ -1,3 +1,7 @@
+## 0.0.5
+
+* Padding for TabBar added
+
 ## 0.0.4
 
 * Unselected tab item style added
