@@ -1,3 +1,7 @@
+## 0.0.4
+
+* Unselected tab item style added
+
 ## 0.0.3
 
 * Prefix and suffix widgets support added before and after tabs

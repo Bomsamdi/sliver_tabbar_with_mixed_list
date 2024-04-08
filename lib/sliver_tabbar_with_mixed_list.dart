@@ -3,6 +3,7 @@ library sliver_tabbar_with_mixed_list;
 import 'dart:async';
 
 import 'package:after_first_frame_mixin/after_first_frame_mixin.dart';
+import 'package:buttons_tabbar/buttons_tabbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:sliver_tabbar_with_mixed_list/src/sliver_header_with_sliver_body_widget.dart';
@@ -32,6 +33,11 @@ class SliverTabBarWithMixedList extends StatefulWidget {
     required this.itemExtentBuilder,
     required this.sections,
     required this.generateTabs,
+    required this.tabBarButtonBackgroundColor,
+    required this.tabBarButtonUnselectedBackgroundColor,
+    required this.labelStyle,
+    required this.unselectedLabelStyle,
+    required this.tabBarButtonRadius,
     this.prefixWidget,
     this.sufixWidget,
     this.tabBarScrollPhysics,
@@ -48,6 +54,8 @@ class SliverTabBarWithMixedList extends StatefulWidget {
     this.tabBarCurveAnimation = Curves.linear,
     this.listScrollCurveAnimation = Curves.easeInOut,
     this.customFooterWidget,
+    this.contentPadding = EdgeInsets.zero,
+    this.buttonMargin = const EdgeInsets.all(4.0),
   });
 
   /// The widget to use as a prefix before tabs.
@@ -120,6 +128,27 @@ class SliverTabBarWithMixedList extends StatefulWidget {
 
   /// The children extent builder.
   final ExtendedItemExtentBuilder itemExtentBuilder;
+
+  /// Tabbars button background color
+  final Color tabBarButtonBackgroundColor;
+
+  /// Tabbars button unselected background color
+  final Color tabBarButtonUnselectedBackgroundColor;
+
+  /// Tabbars button label style
+  final TextStyle labelStyle;
+
+  /// Tabbars button unselected label style
+  final TextStyle unselectedLabelStyle;
+
+  /// Tabbars button radius
+  final double tabBarButtonRadius;
+
+  /// The padding for the content.
+  final EdgeInsets contentPadding;
+
+  /// The margin for each button in the tabbar
+  final EdgeInsets buttonMargin;
 
   @override
   State<SliverTabBarWithMixedList> createState() =>
@@ -301,17 +330,34 @@ class _SliverTabBarWithMixedListState extends State<SliverTabBarWithMixedList>
           child: Row(
             children: [
               if (widget.prefixWidget != null) widget.prefixWidget!,
+              // Expanded(
+              //   child: TabBar(
+              //     isScrollable: true,
+              //     indicator: widget.tabBarIndicator,
+              //     indicatorPadding: widget.indicatorPadding,
+              //     indicatorSize: widget.tabBarIndicatorSize,
+              //     tabAlignment: widget.tabAlignment,
+              //     controller: _tabController,
+              //     onTap: _onTapTabBarItem,
+              //     physics: widget.tabBarScrollPhysics,
+              //     tabs: _tabItems,
+              //   ),
+              // ),
               Expanded(
-                child: TabBar(
-                  isScrollable: true,
-                  indicator: widget.tabBarIndicator,
-                  indicatorPadding: widget.indicatorPadding,
-                  indicatorSize: widget.tabBarIndicatorSize,
-                  tabAlignment: widget.tabAlignment,
+                child: ButtonsTabBar(
+                  buttonMargin: widget.buttonMargin,
+                  backgroundColor: widget.tabBarButtonBackgroundColor,
+                  unselectedBackgroundColor:
+                      widget.tabBarButtonUnselectedBackgroundColor,
                   controller: _tabController,
-                  onTap: _onTapTabBarItem,
-                  physics: widget.tabBarScrollPhysics,
+                  labelStyle: widget.labelStyle,
+                  unselectedLabelStyle: widget.unselectedLabelStyle,
+                  radius: widget.tabBarButtonRadius,
                   tabs: _tabItems,
+                  onTap: _onTapTabBarItem,
+                  contentPadding: widget.contentPadding,
+                  physics: widget.tabBarScrollPhysics ??
+                      const BouncingScrollPhysics(),
                 ),
               ),
               if (widget.sufixWidget != null) widget.sufixWidget!,
@@ -445,12 +491,15 @@ abstract class ListItem {
   final double itemHeight;
 }
 
-class TabItem extends StatelessWidget implements PreferredSizeWidget {
+class TabItem extends Tab {
+  //StatelessWidget implements PreferredSizeWidget {
+
   /// Creates a Material Design [SliverTabBarWithMixedList] tab.
   const TabItem({
     super.key,
-    this.text,
-    this.height,
+    super.text,
+    super.height,
+    super.icon,
     required this.headerItem,
   });
 
@@ -458,34 +507,17 @@ class TabItem extends StatelessWidget implements PreferredSizeWidget {
   final HeaderItem headerItem;
 
   /// The text to display as the tab's label.
-  final String? text;
+  // @override
+  // final String? text;
 
   /// The height of the [TabItem].
   ///
   /// If null, the height will be calculated based on the content of the [TabItem].
-  final double? height;
+  // @override
+  // final double? height;
 
   Widget buildLabelText() {
     return Text(text!, softWrap: false, overflow: TextOverflow.ellipsis);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final Widget label;
-    label = Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        buildLabelText(),
-      ],
-    );
-
-    return SizedBox(
-      height: height ?? _kTabHeight,
-      child: Center(
-        widthFactor: 1.0,
-        child: label,
-      ),
-    );
   }
 
   @override

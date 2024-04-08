@@ -273,6 +273,18 @@ class _MyHomePageState extends State<MyHomePage> {
               childBuilder: buildChild,
               variantChildBuilder: buildVariantChild,
               itemExtentBuilder: itemExtentBuilder,
+              tabBarButtonBackgroundColor: Colors.blue,
+              tabBarButtonUnselectedBackgroundColor: Colors.grey,
+              labelStyle: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+              unselectedLabelStyle: const TextStyle(
+                color: Colors.blue,
+                fontSize: 16,
+              ),
+              tabBarButtonRadius: 40,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 8.0),
             )
           ],
         ),
