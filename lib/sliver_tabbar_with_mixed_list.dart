@@ -57,6 +57,8 @@ class SliverTabBarWithMixedList extends StatefulWidget {
     this.contentPadding = EdgeInsets.zero,
     this.buttonMargin = const EdgeInsets.all(4.0),
     this.tabBarPadding = EdgeInsets.zero,
+    this.isTabBarVisible = true,
+    this.footerHeight,
   });
 
   /// The widget to use as a prefix before tabs.
@@ -153,6 +155,12 @@ class SliverTabBarWithMixedList extends StatefulWidget {
 
   /// Padding for the tabbar of [SliverTabBarWithMixedList].
   final EdgeInsets tabBarPadding;
+
+  /// Parameter for the visibility of the tab bar.
+  final bool isTabBarVisible;
+
+  /// Parameter for the height of footer below the list.
+  final double? footerHeight;
 
   @override
   State<SliverTabBarWithMixedList> createState() =>
@@ -273,29 +281,12 @@ class _SliverTabBarWithMixedListState extends State<SliverTabBarWithMixedList>
         _footerHeight = (height - elementHeight).ceilToDouble();
         setState(() {});
       }
+      if (widget.footerHeight != null) {
+        _footerHeight = widget.footerHeight;
+        setState(() {});
+      }
     }
   }
-
-  // @override
-  // void didUpdateWidget(covariant SliverTabBarWithMixedList oldWidget) {
-  //   if (oldWidget.listItemHeight != widget.listItemHeight) {
-  //     setState(() {
-  //       _listItemHeight = widget.listItemHeight;
-  //     });
-  //   }
-  //   if (oldWidget.sections != widget.sections) {
-  //     _sections.clear();
-  //     _items.clear();
-  //     _sections = widget.sections;
-  //     for (Section section in _sections) {
-  //       _items.add(section.header);
-  //       for (ChildItem childItem in section.children) {
-  //         _items.add(childItem);
-  //       }
-  //     }
-  //   }
-  //   super.didUpdateWidget(oldWidget);
-  // }
 
   @override
   void dispose() {
@@ -329,46 +320,36 @@ class _SliverTabBarWithMixedListState extends State<SliverTabBarWithMixedList>
     return SliverHeaderWithSliverBodyWidget(
       pushPinnedChildren: true,
       header: SliverPinnedHeader(
-        child: Container(
-          padding: widget.tabBarPadding,
-          color: widget.tabBarBackgroundColor ?? theme.scaffoldBackgroundColor,
-          child: Row(
-            children: [
-              if (widget.prefixWidget != null) widget.prefixWidget!,
-              // Expanded(
-              //   child: TabBar(
-              //     isScrollable: true,
-              //     indicator: widget.tabBarIndicator,
-              //     indicatorPadding: widget.indicatorPadding,
-              //     indicatorSize: widget.tabBarIndicatorSize,
-              //     tabAlignment: widget.tabAlignment,
-              //     controller: _tabController,
-              //     onTap: _onTapTabBarItem,
-              //     physics: widget.tabBarScrollPhysics,
-              //     tabs: _tabItems,
-              //   ),
-              // ),
-              Expanded(
-                child: ButtonsTabBar(
-                  buttonMargin: widget.buttonMargin,
-                  backgroundColor: widget.tabBarButtonBackgroundColor,
-                  unselectedBackgroundColor:
-                      widget.tabBarButtonUnselectedBackgroundColor,
-                  controller: _tabController,
-                  labelStyle: widget.labelStyle,
-                  unselectedLabelStyle: widget.unselectedLabelStyle,
-                  radius: widget.tabBarButtonRadius,
-                  tabs: _tabItems,
-                  onTap: _onTapTabBarItem,
-                  contentPadding: widget.contentPadding,
-                  physics: widget.tabBarScrollPhysics ??
-                      const BouncingScrollPhysics(),
+        child: widget.isTabBarVisible
+            ? Container(
+                padding: widget.tabBarPadding,
+                color: widget.tabBarBackgroundColor ??
+                    theme.scaffoldBackgroundColor,
+                child: Row(
+                  children: [
+                    if (widget.prefixWidget != null) widget.prefixWidget!,
+                    Expanded(
+                      child: ButtonsTabBar(
+                        buttonMargin: widget.buttonMargin,
+                        backgroundColor: widget.tabBarButtonBackgroundColor,
+                        unselectedBackgroundColor:
+                            widget.tabBarButtonUnselectedBackgroundColor,
+                        controller: _tabController,
+                        labelStyle: widget.labelStyle,
+                        unselectedLabelStyle: widget.unselectedLabelStyle,
+                        radius: widget.tabBarButtonRadius,
+                        tabs: _tabItems,
+                        onTap: _onTapTabBarItem,
+                        contentPadding: widget.contentPadding,
+                        physics: widget.tabBarScrollPhysics ??
+                            const BouncingScrollPhysics(),
+                      ),
+                    ),
+                    if (widget.sufixWidget != null) widget.sufixWidget!,
+                  ],
                 ),
-              ),
-              if (widget.sufixWidget != null) widget.sufixWidget!,
-            ],
-          ),
-        ),
+              )
+            : Container(),
       ),
       body: SliverVariedExtentList.builder(
         itemExtentBuilder: (index, dimensions) {

@@ -1,3 +1,11 @@
+## 0.0.7
+
+* More flexible footer support added
+
+## 0.0.6
+
+* Parameter to hide TabBar added
+
 ## 0.0.5
 
 * Padding for TabBar added
