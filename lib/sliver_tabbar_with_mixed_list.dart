@@ -1,6 +1,7 @@
 library sliver_tabbar_with_mixed_list;
 
 import 'dart:async';
+import 'dart:math';
 
 import 'package:after_first_frame_mixin/after_first_frame_mixin.dart';
 import 'package:buttons_tabbar/buttons_tabbar.dart';
@@ -278,13 +279,18 @@ class _SliverTabBarWithMixedListState extends State<SliverTabBarWithMixedList>
       double elementHeight =
           _items.skip(_indexOfLastHeaderItem!).length * _listItemHeight;
       if (height > elementHeight) {
-        _footerHeight = (height - elementHeight).ceilToDouble();
-        setState(() {});
+        if (widget.footerHeight != null) {
+          _footerHeight = max(
+              (height - elementHeight).ceilToDouble(), widget.footerHeight!);
+          setState(() {});
+        } else {
+          _footerHeight = (height - elementHeight).ceilToDouble();
+          setState(() {});
+        }
       }
-      if (widget.footerHeight != null) {
-        _footerHeight = widget.footerHeight;
-        setState(() {});
-      }
+    } else if (widget.footerHeight != null) {
+      _footerHeight = widget.footerHeight;
+      setState(() {});
     }
   }
 

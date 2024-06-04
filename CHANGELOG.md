@@ -1,3 +1,7 @@
+## 0.0.8
+
+* More flexibilty for footer added
+
 ## 0.0.7
 
 * More flexible footer support added
