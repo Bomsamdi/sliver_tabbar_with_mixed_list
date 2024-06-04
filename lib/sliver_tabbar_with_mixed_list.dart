@@ -287,6 +287,9 @@ class _SliverTabBarWithMixedListState extends State<SliverTabBarWithMixedList>
           _footerHeight = (height - elementHeight).ceilToDouble();
           setState(() {});
         }
+      } else if (widget.footerHeight != null) {
+        _footerHeight = widget.footerHeight;
+        setState(() {});
       }
     } else if (widget.footerHeight != null) {
       _footerHeight = widget.footerHeight;

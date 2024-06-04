@@ -1,3 +1,7 @@
+## 0.0.9
+
+* Footer available when last section is long enough
+
 ## 0.0.8
 
 * More flexibilty for footer added
